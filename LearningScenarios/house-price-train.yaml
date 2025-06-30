@@ -1,38 +1,44 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: data-pipeline
+  name: data-pipeline # Executable ID, must be unique across your workflows
   annotations:
     scenarios.ai.sap.com/description: "Learning how to ingest data to workflows"
-    scenarios.ai.sap.com/name: "House Price (Tutorial)"
+    scenarios.ai.sap.com/name: "House Price (Tutorial)" # Scenario name = your use case
     executables.ai.sap.com/description: "Train with live data"
-    executables.ai.sap.com/name: "training"
-    artifacts.ai.sap.com/housedataset.kind: "dataset"
+    executables.ai.sap.com/name: "training" # Executable name = describes the workflow
+    artifacts.ai.sap.com/housedataset.kind: "dataset" # Declares expected input type
   labels:
     scenarios.ai.sap.com/id: "learning-datalines"
     ai.sap.com/version: "1.0"
 spec:
   imagePullSecrets:
-    - name: bhuni # your docker registry secret
+    - name: bhuni # Your Docker registry secret name
   entrypoint: mypipeline
+
   arguments:
-    parameters:
+    parameters: # Hyperparameter placeholder
       - name: DT_MAX_DEPTH
+
   templates:
     - name: mypipeline
       steps:
         - - name: mypredictor
             template: mycodeblock1
+
     - name: mycodeblock1
+      metadata:
+        labels:
+          ai.sap.com/resourcePlan: starter # Define resource usage
       inputs:
-        artifacts:
+        artifacts:  # Dataset placeholder
           - name: housedataset
-            path: /app/data/
+            path: /app/data/ # Dataset copied here in Docker image
       container:
-        image: docker.io/bhuni/house-price:03
+        image: docker.io/bhuni/house-price:03 # Your Docker image name and tag
         command: ["/bin/sh", "-c"]
         env:
-          - name: DT_MAX_DEPTH
-            value: "{{workflow.parameters.DT_MAX_DEPTH}}"
+          - name: DT_MAX_DEPTH # Passed to the container as ENV variable
+            value: "{{workflow.parameters.DT_MAX_DEPTH}}" # Value from workflow param
         args:
           - "python /app/src/main.py"
