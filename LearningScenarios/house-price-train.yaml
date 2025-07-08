@@ -42,7 +42,7 @@ spec:
             archive:
               none: {}                  # don't compress it
       container:
-        image: docker.io/bhuni/house-price:03
+        image: docker.io/bhuni/house-price:04
         command: ["/bin/sh", "-c"]
         env:
           - name: DT_MAX_DEPTH
